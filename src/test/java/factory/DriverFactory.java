@@ -18,13 +18,22 @@ public class DriverFactory {
 
     public static WebDriver getDriver() {
         if (driver == null) {
-            WebDriverManager.chromedriver().setup();
+
+            // Clear old driver cache to avoid Chrome / ChromeDriver version mismatch in GitHub Actions
+            WebDriverManager.chromedriver().clearDriverCache().setup();
+
             ChromeOptions options = new ChromeOptions();
             options.addArguments("--remote-allow-origins=*");
             options.addArguments("--disable-notifications");
             options.addArguments("--disable-popup-blocking");
             options.addArguments("--disable-save-password-bubble");
             options.addArguments("--disable-features=PasswordLeakDetection,PasswordManagerOnboarding,AutofillServerCommunication");
+
+            // Useful for GitHub Actions / CI execution
+            options.addArguments("--headless=new");
+            options.addArguments("--no-sandbox");
+            options.addArguments("--disable-dev-shm-usage");
+            options.addArguments("--window-size=1920,1080");
 
             Map<String, Object> prefs = new HashMap<>();
             prefs.put("credentials_enable_service", false);
@@ -33,7 +42,6 @@ public class DriverFactory {
             options.setExperimentalOption("prefs", prefs);
 
             driver = new ChromeDriver(options);
-            driver.manage().window().maximize();
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
         }
         return driver;
@@ -58,4 +66,3 @@ public class DriverFactory {
         return properties;
     }
 }
-
